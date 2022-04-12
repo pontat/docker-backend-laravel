@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    volumes:
+      - php-fpm-socket:/var/run/php-fpm
+      - ./backend/src:/var/www
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - php-fpm-socket:/var/run/php-fpm
+      - ./backend/src:/var/www
+    depends_on:
+      - backend
+  test-mysql:
+    image: mysql:8.0.23
+    platform: linux/amd64
+    tmpfs:
+      - /var/lib/mysql
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: password
+volumes:
+  mysql_volume:
+  php-fpm-socket:
